@@ -14,6 +14,9 @@ import shutil
 import RPi.GPIO as GPIO
 import socket 
 import smtplib
+import mysql.connector
+from mysql.connector import Error
+from mysql.connector import errorcode
 
 s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 s.connect(('google.com',0))
@@ -27,6 +30,9 @@ mail.starttls()
 mail.login('baopq.spkt@gmail.com','bao0985265185')
 mail.sendmail('baopq.spkt@gmail.com','baopq.spkt@gmail.com',content)
 mail.close()
+
+now = datetime.now()
+formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
 
 TRIG = 23
 ECHO = 24
@@ -44,6 +50,7 @@ writer = None
 pulse_start = 0
 pulse_end = 0;
 
+# Decleare information about ultra 
 def ultra(TRIG,ECHO):
     global pulse_start
     global pulse_end
@@ -61,6 +68,28 @@ def ultra(TRIG,ECHO):
     distance = round(distance,2)
     return distance
 
+# Decleare information about mysql and python 
+def commitdata(name):
+    try:
+        connection = mysql.connector.connect(host = "103.95.197.126",
+        user = "baopqspkt",
+        passwd = "bao0985265185",
+        database = "baopqspk_control")
+        sql_insert_query = """ INSERT INTO `Door`
+                          (`Day`,`Name`) VALUES (%s,%s)"""
+        cursor = connection.cursor()
+        result  = cursor.execute(sql_insert_query,(formatted_date,name))
+        connection.commit()
+    except mysql.connector.Error as error :
+        connection.rollback() #rollback if any exception occured
+    finally:
+        #closing database connection.
+        if(connection.is_connected()):
+            cursor.close()
+            connection.close()
+
+
+
 data = pickle.loads(open("/home/pi/Downloads/pi-face-recognition/encodings.pickle", "rb").read())
 detector = cv2.CascadeClassifier("/home/pi/Downloads/pi-face-recognition/haarcascade_frontalface_default.xml")
 
@@ -74,6 +103,7 @@ minute = now.minute
 minuteold = now.minute+10
 # loop over frames from the video file stream
 while minute != minuteold:
+    GPIO.output(TRIG,False)
     distance =  ultra(TRIG,ECHO)
     print(distance)
     now = datetime.now()
@@ -116,7 +146,10 @@ while minute != minuteold:
                 cv2.imwrite(mypath + str(hour) + '-' + str(minute) + '-' + '.jpg',frame)
                 break
             else:
-                continu=0
+                commitdata(name)
+                GPIO.output(TRIG,True)
+                time.sleep(5)
+                GPIO.output(TRIG,False)
                 break
     pathvideo = "/home/pi/Downloads/pi-face-recognition/output/" 
     pathvideo = pathvideo + str(day) + '-' + str(month) + '-' + str(year) 
