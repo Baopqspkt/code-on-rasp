@@ -28,7 +28,7 @@ s.close()
 to = 'baopq.spkt@gmail.com'
 fromemail = 'baopq.spkt@gmail.com'
 your_pass = "bao0985265185"
-body = "Your Ip connect to network: " + str(ipAdress)
+body = "User: pi\n" + "Password: raspberry\n" + "Your Ip connect to network: " + str(ipAdress)
 subject = "Information Camera System"
 message = MIMEMultipart()
 message['From'] = fromemail
@@ -146,8 +146,8 @@ def checkusb(pathimagelocal,pathvideolocal):
     else :
         print("Don't Have USB")
 
-data = pickle.loads(open("/home/pi/Downloads/pi-face-recognition/encodings.pickle", "rb").read())
-detector = cv2.CascadeClassifier("/home/pi/Downloads/pi-face-recognition/haarcascade_frontalface_default.xml")
+data = pickle.loads(open("/home/pi/Desktop/code-on-rasp/encoding.pickle", "rb").read())
+detector = cv2.CascadeClassifier("/home/pi/Desktop/code-on-rasp/haarcascade_frontalface_default.xml")
 
 vs = VideoStream(src=0).start()
 #vs = VideoStream(usePiCamera=True).start()
@@ -200,7 +200,7 @@ while True:
                 print(name)
                 if (name == "Unknown"):
                     print("Unknown")
-                    pathimagelocal = "/home/pi/Downloads/pi-face-recognition/Nguoila"
+                    pathimagelocal = "/home/pi/Desktop/code-on-rasp/Nguoila"
                     pathimagelocalarg = pathimagelocal
                     pathimagelocal= pathimagelocal + '/' + str(year) + '-' + str(month) + '-' + str(date) + '/'
                     if not os.path.isdir(pathimagelocal):
@@ -214,7 +214,7 @@ while True:
                     time.sleep(5)
                     GPIO.output(TRIG,False)
                     break
-        pathvideolocal = "/home/pi/Downloads/pi-face-recognition/output" 
+        pathvideolocal = "/home/pi/Desktop/code-on-rasp/output" 
         pathvideolocalarg = pathvideolocal
         pathvideolocal = pathvideolocal + '/' + str(date) + '-' + str(month) + '-' + str(year) 
         if not os.path.isdir(pathvideolocal):
